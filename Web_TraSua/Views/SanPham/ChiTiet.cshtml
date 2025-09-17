@@ -1,0 +1,322 @@
+﻿@model WebTraSua.Models.SanPham
+@{
+    ViewData["Title"] = Model.TenSP;
+    var imgFileName = string.IsNullOrWhiteSpace(Model.Anh) ? "placeholder-drink.jpg" : Model.Anh.Trim();
+    var imgUrl = Url.Content("~/images/" + imgFileName);
+}
+<style>
+    body {
+        background: linear-gradient(135deg,#fff8f0,#ffe7d6);
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .product-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        padding: 30px;
+        margin-top: 40px;
+    }
+
+    .product-img {
+        width: 100%;
+        max-width: 480px;
+        height: 480px;
+        object-fit: cover;
+        border-radius: 16px;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    .product-title {
+        font-weight: 900;
+        font-size: 2.4rem;
+        margin-bottom: 15px;
+        color: #222;
+    }
+
+    .category-badge {
+        background-color: #ff7b54;
+        color: #fff;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+        display: inline-block;
+    }
+
+    .btn {
+        border-radius: 999px;
+        font-weight: 600;
+    }
+
+    .comments-list {
+        margin-top: 20px;
+    }
+
+    .comment-item {
+        background-color: #fff;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        transition: all 0.2s ease-in-out;
+    }
+
+        .comment-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        align-items: center;
+    }
+
+        .comment-header strong {
+            color: #333;
+        }
+
+        .comment-header .text-muted {
+            font-size: 0.9rem;
+        }
+
+    .avatar {
+        background: #ff7b54;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+    }
+
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.1rem;
+    }
+
+    .admin-reply {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 12px;
+        background: #f1f7ff;
+        border-left: 4px solid #0d6efd;
+        position: relative;
+    }
+
+        .admin-reply::before {
+            content: "👨‍💼 Admin";
+            font-weight: 600;
+            color: #0d6efd;
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            background: #f1f7ff;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+    .comment-form {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    .stars-rating {
+        display: flex;
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+    }
+
+        .stars-rating .star.selected {
+            color: #ff7b54;
+        }
+</style>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Trang Chủ</a></li>
+        <li class="breadcrumb-item">
+            <a href="/SanPham/DanhMuc/@Model.DanhMuc?.MaDM">
+                @(Model.DanhMuc?.TenDM ?? "Không xác định")
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.TenSP</li>
+    </ol>
+</nav>
+<div class="container product-card">
+    <div class="row align-items-center">
+        <!-- Ảnh -->
+        <div class="col-md-6 text-center">
+            <img src="@imgUrl" alt="@Model.TenSP" class="product-img" />
+        </div>
+        <!-- Thông tin + form mua -->
+        <div class="col-md-6">
+            <h1 class="product-title">@Model.TenSP</h1>
+            <div class="category-badge">@(Model.DanhMuc?.TenDM ?? "Không xác định")</div>
+            <h5 class="mt-3">Chọn size & số lượng:</h5>
+            @if (Model.SanPhamSizes?.Any() == true)
+            {
+                <form id="formAddCart">
+                    <input type="hidden" name="MaSP" value="@Model.MaSP" />
+                    <table class="table table-bordered align-middle mt-2">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Chọn</th>
+                                <th>Size</th>
+                                <th class="text-center">Giá</th>
+                                <th class="text-center">SL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var size in Model.SanPhamSizes)
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox" class="form-check-input"
+                                               name="SelectedSizes" value="@size.MaSize" />
+                                    </td>
+                                    <td>@size.Size.TenSize</td>
+                                    <td class="text-center">@size.Gia.ToString("N0") đ</td>
+                                    <td class="text-center">
+                                        <input type="number" class="form-control form-control-sm"
+                                               name="SoLuong[@size.MaSize]" value="0" min="0" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-success mt-2" onclick="submitChiTiet()">➕ Thêm vào giỏ</button>
+                    <a href="/GioHang/XemGioHang" class="btn btn-primary mt-2">🛒 Xem giỏ</a>
+                </form>
+            }
+            else
+            {
+                <p class="text-muted fst-italic">Chưa có size cho sản phẩm này.</p>
+            }
+        </div>
+    </div>
+</div>
+<!-- Bình luận -->
+<div class="container mt-5">
+    <h3 class="mb-4 fw-bold">💬 Bình luận về @Model.TenSP</h3>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+    @if (Model.BinhLuans != null && Model.BinhLuans.Any(bl => bl.TrangThai == "Duyet"))
+    {
+        <div class="comments-list">
+            @foreach (var bl in Model.BinhLuans
+                    .Where(bl => bl.TrangThai == "Duyet")
+                    .OrderByDescending(b => b.NgayBinhLuan))
+            {
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar">@bl.TenNguoiDung?[0].ToString().ToUpper()</div>
+                            <strong>@bl.TenNguoiDung</strong>
+                        </div>
+                        <span class="text-muted">
+                            @(bl.NgayBinhLuan?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")
+                        </span>
+                    </div>
+                    <p class="mb-2">@(string.IsNullOrWhiteSpace(bl.NoiDung) ? "Chưa có nội dung" : bl.NoiDung)</p>
+                    <div class="rating-stars mb-2">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= bl.Sao)
+                            {
+                                <i class="bi bi-star-fill"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star"></i>
+                            }
+                        }
+                    </div>
+                    @if (!string.IsNullOrEmpty(bl.PhanHoi))
+                    {
+                        <div class="admin-reply">
+                            <p class="mb-1">@bl.PhanHoi</p>
+                            <small class="text-muted">(@bl.NgayPhanHoi?.ToString("dd/MM/yyyy HH:mm"))</small>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-muted fst-italic">Chưa có bình luận nào cho sản phẩm này.</p>
+    }
+    <h4 class="mt-5">Để lại bình luận của bạn</h4>
+    <!-- Form thêm bình luận -->
+    <form method="post" asp-controller="BinhLuan" asp-action="ThemBinhLuan" class="comment-form mt-4">
+        <input type="hidden" name="MaSP" value="@Model.MaSP" />
+        <div class="mb-3">
+            <label class="form-label">Tên bạn</label>
+            <input type="text" name="TenNguoiDung" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nội dung bình luận</label>
+            <textarea name="NoiDung" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Đánh giá (1-5 sao)</label>
+            <div class="stars-rating" data-rating="0">
+                <span class="star" data-value="1">&#9733;</span>
+                <span class="star" data-value="2">&#9733;</span>
+                <span class="star" data-value="3">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" data-value="5">&#9733;</span>
+            </div>
+            <input type="hidden" name="Sao" id="SaoValue" value="0" />
+        </div>
+        <button type="submit" class="btn btn-primary">Gửi bình luận</button>
+    </form>
+</div>
+@section Scripts {
+    <script>
+        async function submitChiTiet(){
+            const form=document.getElementById('formAddCart');
+            const fd=new FormData(form);
+            let ok=false;
+            form.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+                const qty=form.querySelector(`[name="SoLuong[${cb.value}]"]`);
+                if(cb.checked && qty && +qty.value>0) ok=true;
+            });
+            if(!ok){ alert("Vui lòng chọn size và số lượng > 0"); return; }
+            const resp=await fetch('/GioHang/ThemAjax',{method:'POST',body:fd});
+            if(resp.ok){
+                alert("✅ Đã thêm vào giỏ!");
+            }else{
+                alert("❌ Có lỗi khi thêm giỏ!");
+            }
+        }
+        // chọn sao đánh giá
+        document.querySelectorAll('.stars-rating .star').forEach(star=>{
+            star.addEventListener('click',()=>{
+                const val=star.getAttribute('data-value');
+                document.getElementById('SaoValue').value=val;
+                document.querySelectorAll('.stars-rating .star').forEach(s=>{
+                    s.classList.toggle('selected', s.getAttribute('data-value')<=val);
+                });
+            });
+        });
+    </script>
+}

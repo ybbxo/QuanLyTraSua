@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    var hoTen = Context.Session.GetString("HoTen");
+    var email = Context.Session.GetString("Email"); 
+}
+<div class="card mx-auto" style="max-width:600px;">
+    <div class="card-header bg-primary text-white">
+        <h4>Thông tin cá nhân</h4>
+    </div>
+    <div class="card-body">
+        <p><strong>Họ tên:</strong> @hoTen</p>
+        <p><strong>Email:</strong> @email</p>
+        <button id="btnDoiMatKhau" class="btn btn-warning mb-3">Đổi mật khẩu</button>
+        <div id="formDoiMatKhau" style="display:none;">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+            <form asp-action="DoiMatKhauKhachHang" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Mật khẩu cũ</label>
+                    <input type="password" class="form-control" name="matKhauCu" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mật khẩu mới</label>
+                    <input type="password" class="form-control" name="matKhauMoi" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Xác nhận mật khẩu mới</label>
+                    <input type="password" class="form-control" name="xacNhan" required />
+                </div>
+                <button type="submit" class="btn btn-success">Đổi mật khẩu</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    const btn = document.getElementById('btnDoiMatKhau');
+    const form = document.getElementById('formDoiMatKhau');
+
+    btn.addEventListener('click', () => {
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            btn.textContent = "Đóng form đổi mật khẩu";
+        } else {
+            form.style.display = "none";
+            btn.textContent = "Đổi mật khẩu";
+        }
+    });
+</script>

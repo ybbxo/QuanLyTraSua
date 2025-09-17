@@ -1,0 +1,129 @@
+﻿@model Web_TraSua.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<style>
+    body.auth-page {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: linear-gradient(to bottom, rgba(255,123,84,.5), rgba(255,211,182,.3)), url('/images/hero_tra_sua.jpg') center/cover no-repeat;
+    }
+
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 70px); 
+        padding: 20px;
+    }
+
+    .auth-box {
+        max-width: 420px;
+        width: 100%;
+        background-color: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        padding: 40px 35px;
+        border-radius: 16px;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+    }
+
+        .auth-box h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .auth-box form div {
+            margin-bottom: 18px;
+        }
+
+        .auth-box label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .auth-box input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        .auth-box button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--brand, goldenrod);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+            .auth-box button:hover {
+                background-color: #d4a017;
+            }
+
+    .auth-link {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+        .auth-link a {
+            color: #c7337d;
+            font-weight: bold;
+        }
+</style>
+
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2>Đăng ký tài khoản</h2>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="text-danger text-center mb-2">
+                    @Html.ValidationSummary(false)
+                </div>
+            }
+            <form asp-action="Register" method="post">
+                <div>
+                    <label asp-for="HoTen"></label>
+                    <input asp-for="HoTen" class="form-control" />
+                    <span asp-validation-for="HoTen" class="text-danger"></span>
+                </div>
+                <div>
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div>
+                    <label asp-for="MatKhau"></label>
+                    <input asp-for="MatKhau" class="form-control" type="password" />
+                    <span asp-validation-for="MatKhau" class="text-danger"></span>
+                </div>
+                <div>
+                    <label asp-for="XacNhanMatKhau"></label>
+                    <input asp-for="XacNhanMatKhau" class="form-control" type="password" />
+                    <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
+                </div>
+                <button type="submit">Đăng ký</button>
+            </form>
+            <p class="auth-link">
+                Đã có tài khoản? <a asp-controller="Account" asp-action="Login">Đăng nhập ngay</a>
+            </p>
+        </div>
+    </div>
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
+</body>

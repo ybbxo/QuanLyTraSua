@@ -1,0 +1,169 @@
+﻿@model Web_TraSua.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<style>
+    body.auth-page {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: linear-gradient(to bottom, rgba(255,123,84,0.5), rgba(255,211,182,0.3)), url('/images/hero_tra_sua.jpg') center/cover no-repeat;
+    }
+
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 70px);
+        padding: 20px;
+    }
+
+    .auth-box {
+        max-width: 420px;
+        width: 100%;
+        background-color: rgba(255,255,255,0.95);
+        backdrop-filter: blur(12px);
+        padding: 40px 35px;
+        border-radius: 16px;
+        box-shadow: 0 14px 32px rgba(0,0,0,0.25);
+    }
+
+        .auth-box h2 {
+            text-align: center;
+            color: #ff7b54;
+            margin-bottom: 20px;
+            font-weight: 900;
+        }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+        .input-group i.left-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 45px 12px 35px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+            .input-group input:focus {
+                border-color: #ff7b54;
+                box-shadow: 0 0 0 3px rgba(255,123,84,0.2);
+                outline: none;
+            }
+
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #888;
+    }
+
+    .auth-box button {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(90deg, #ff7b54, #ffd3b6);
+        background-size: 200% 200%;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+        .auth-box button:hover {
+            background-position: 100% 0;
+            transform: translateY(-2px);
+        }
+
+    .auth-link {
+        text-align: center;
+        margin-top: 18px;
+        font-size: 14px;
+    }
+
+        .auth-link a {
+            color: #ff7b54;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+            .auth-link a:hover {
+                text-decoration: underline;
+            }
+
+    .text-danger {
+        font-size: 13px;
+        margin-top: 4px;
+        display: block;
+    }
+
+    .alert-custom {
+        background: linear-gradient(90deg, #ff7b54, #ffd3b6);
+        color: white;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+</style>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2>Đăng nhập</h2>
+            <form asp-action="Login" method="post">
+                <div class="input-group">
+                    <i class="bi bi-envelope left-icon"></i>
+                    <input asp-for="Email" placeholder="Nhập email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="input-group">
+                    <input asp-for="MatKhau" type="password" placeholder="Nhập mật khẩu" id="passwordInput" />
+                    <i class="bi bi-eye-fill toggle-password" onclick="togglePassword()"></i>
+                    <span asp-validation-for="MatKhau" class="text-danger"></span>
+                </div>
+                <button type="submit">Đăng nhập</button>
+            </form>
+            <p class="auth-link">
+                Chưa có tài khoản? <a asp-controller="Account" asp-action="Register">Đăng ký ngay</a>
+            </p>
+        </div>
+    </div>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function togglePassword() {
+                const input = document.getElementById('passwordInput');
+                const icon = document.querySelector('.toggle-password');
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.classList.remove('bi-eye-fill');
+                    icon.classList.add('bi-eye-slash-fill');
+                } else {
+                    input.type = "password";
+                    icon.classList.remove('bi-eye-slash-fill');
+                    icon.classList.add('bi-eye-fill');
+                }
+            }
+        </script>
+    }
+</body>

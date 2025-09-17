@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Đổi mật khẩu";
+}
+<div class="card mx-auto" style="max-width:500px;">
+    <div class="card-header bg-primary text-white">
+        <h4>Đổi mật khẩu</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="DoiMatKhauKhachHang" method="post">
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu cũ</label>
+                <input type="password" class="form-control" name="matKhauCu" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu mới</label>
+                <input type="password" class="form-control" name="matKhauMoi" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Xác nhận mật khẩu mới</label>
+                <input type="password" class="form-control" name="xacNhan" required />
+            </div>
+            <button type="submit" class="btn btn-success">Đổi mật khẩu</button>
+        </form>
+    </div>
+</div>

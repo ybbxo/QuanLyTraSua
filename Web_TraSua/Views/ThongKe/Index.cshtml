@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Thống kê doanh thu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>📈 Thống kê doanh thu</h2>
+<div class="row mb-3">
+    <div class="col-md-3">
+        <label>Từ ngày</label>
+        <input type="date" id="tuNgay" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label>Đến ngày</label>
+        <input type="date" id="denNgay" class="form-control" />
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button class="btn btn-primary w-100" onclick="taiDuLieu()">🔍 Xem thống kê</button>
+    </div>
+</div>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Ngày</th>
+            <th>Tổng tiền</th>
+            <th>Số hóa đơn</th>
+        </tr>
+    </thead>
+    <tbody id="tbodyTK"></tbody>
+</table>
+@section Scripts {
+    <script>
+        function taiDuLieu() {
+            const tuNgay = document.getElementById("tuNgay").value;
+            const denNgay = document.getElementById("denNgay").value;
+
+            fetch(`/ThongKe/DoanhThuTheoNgay?tuNgay=${tuNgay}&denNgay=${denNgay}`)
+                .then(res => res.json())
+                .then(data => {
+                    let html = "";
+                    data.forEach(row => {
+                        html += `<tr>
+                            <td>${new Date(row.ngay).toLocaleDateString()}</td>
+                            <td>${row.tongTien.toLocaleString()} đ</td>
+                            <td>${row.soHoaDon}</td>
+                        </tr>`;
+                    });
+                    document.getElementById("tbodyTK").innerHTML = html;
+                });
+        }
+    </script>
+}

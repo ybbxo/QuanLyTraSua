@@ -1,0 +1,90 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    Layout = null;
+    var title = ViewData["Title"] as string ?? "Quản trị";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title - Trà Sữa XYZ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+    <style>
+        body {
+            background: url('/images/hero_tra_sua.jpg') center/cover no-repeat fixed;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+            background: rgba(255,255,255,.8);
+            backdrop-filter: blur(8px);
+        }
+
+        .container-admin {
+            padding: 16px 0 24px;
+        }
+
+        .list-group-item.active {
+            background: #ffc1cc;
+            border-color: #ffc1cc;
+            color: #000;
+        }
+    </style>
+    @RenderSection("Head", required: false)
+</head>
+<body>
+    @{
+        var ctx = Context.RequestServices.GetService<WebTraSua.Data.ApplicationDbContext>();
+        var danhMucs = ctx?.DanhMucSanPhams.ToList() ?? new();
+        var role = Context.Session.GetString("Role");
+        var name = Context.Session.GetString("HoTen");
+    }
+    <nav class="navbar navbar-expand-lg border-bottom">
+        <div class="container-fluid px-3 px-md-4">
+            <a class="navbar-brand fw-bold text-danger text-decoration-none" href="/">TRÀ SỮA XYZ</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navAdmin">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-between" id="navAdmin">
+                <ul class="navbar-nav mx-auto d-flex gap-3">
+                    <li class="nav-item"><a class="nav-link" href="/">TRANG CHỦ</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">DANH MỤC</a>
+                        <ul class="dropdown-menu">
+                            @foreach (var dm in danhMucs)
+                            {
+                                <li><a class="dropdown-item" href="/SanPham/DanhMuc/@dm.MaDM">@dm.TenDM</a></li>
+                            }
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/GioHang/XemGioHang">GIỎ HÀNG</a></li>
+                    <li class="nav-item"><a class="nav-link fw-semibold" href="/QuanLy">TRANG QUẢN LÝ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/Account/Logout">ĐĂNG XUẤT</a></li>
+                </ul>
+                <form class="d-flex" asp-controller="SanPham" asp-action="TimKiem" method="get">
+                    <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm sản phẩm..." value="@ViewBag.Keyword">
+                    <button class="btn btn-outline-warning" type="submit">Tìm</button>
+                </form>
+                @if (!string.IsNullOrEmpty(name))
+                {
+                    <span class="ms-3 text-muted fw-semibold">👤 @name</span>
+                }
+            </div>
+        </div>
+    </nav>
+    <main class="container container-admin">
+        <div class="row g-3">
+            <aside class="col-lg-3">@await Html.PartialAsync("_AdminSidebar")</aside>
+            <section class="col-lg-9">@RenderBody()</section>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

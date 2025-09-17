@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "Trang quản lý";
+
+}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: url('/images/Nenquanli.jpg') center center / cover no-repeat;
+    }
+
+    .admin-container {
+        padding: 40px;
+        font-family: Arial, sans-serif;
+    }
+
+    .admin-header {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .admin-section {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .admin-card {
+        background: #fff8e7;
+        padding: 25px;
+        border-radius: 10px;
+        width: 250px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease-in-out;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .admin-card:hover {
+            background: #ffeeba;
+            transform: scale(1.05);
+        }
+</style>
+
+<div class="admin-container">
+    <div class="admin-header">
+        👋 Xin chào quản lý: <strong>@ViewBag.HoTen</strong>
+    </div>
+    <div class="admin-section">
+        <div class="admin-card" onclick="location.href='/DanhMuc'">Quản lý Danh mục</div>
+        <div class="admin-card" onclick="location.href='/QuanLyDonHang'">Quản lý Đơn hàng</div>
+        <div class="admin-card" onclick="location.href='/BinhLuan'">Quản lý bình luận</div>
+        <div class="admin-card" onclick="location.href='/KhachHang'">Quản lý khách hàng</div>
+        <div class="admin-card" onclick="location.href='/NhapKho'">Nhập kho nguyên liệu</div>
+        <div class="admin-card" onclick="location.href='/ThongKe'">Xem thống kê</div>
+        <div class="admin-card" onclick="location.href='/ThongKe/DoanhThuTheoThang'">📊 Doanh thu theo tháng</div>
+        <div class="admin-card" onclick="location.href='/ThongKe/DoanhThuTheoNgay'">📅 Doanh thu theo ngày</div>
+    </div>
+</div>

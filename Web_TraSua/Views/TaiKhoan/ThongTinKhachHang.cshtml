@@ -1,0 +1,72 @@
+﻿@model WebTraSua.Models.KhachHang
+@{
+    ViewData["Title"] = "Thông tin Khách hàng";
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="container py-5">
+    <div class="card shadow mx-auto" style="max-width: 700px; border-radius: 15px;">
+        <div class="card-header text-white p-4" style="background: linear-gradient(135deg, #667eea, #764ba2); border-top-left-radius: 15px; border-top-right-radius: 15px;">
+            <div class="d-flex align-items-center justify-content-between">
+                <h4 class="mb-0"><i class="fas fa-user me-2"></i>Thông tin Khách hàng</h4>
+                <button id="btnDoiMatKhau" class="btn btn-light btn-sm"><i class="fas fa-lock me-1"></i>Đổi mật khẩu</button>
+            </div>
+        </div>
+        <div class="card-body text-center">
+                      @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            <ul class="list-group list-group-flush mb-3 text-start">
+                <li class="list-group-item"><i class="fas fa-user me-2"></i><strong>Họ tên:</strong> @Model.HoTen</li>
+                <li class="list-group-item"><i class="fas fa-envelope me-2"></i><strong>Email:</strong> @Model.Email</li>
+                <li class="list-group-item"><i class="fas fa-phone me-2"></i><strong>Số điện thoại:</strong> @(string.IsNullOrEmpty(Model.SDT) ? "Chưa cập nhật" : Model.SDT)</li>
+                <li class="list-group-item"><i class="fas fa-star me-2"></i><strong>Điểm tích lũy:</strong> @Model.DiemTichLuy</li>
+                <li class="list-group-item"><i class="fas fa-calendar-alt me-2"></i><strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy")</li>
+            </ul>
+            <div id="formDoiMatKhau" class="card card-body border-primary mb-3 p-3" style="display:none; border-radius: 10px;">
+                <form asp-action="DoiMatKhauKhachHang" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu cũ</label>
+                        <input type="password" class="form-control" name="matKhauCu" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu mới</label>
+                        <input type="password" class="form-control" name="matKhauMoi" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Xác nhận mật khẩu mới</label>
+                        <input type="password" class="form-control" name="xacNhan" required />
+                    </div>
+                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-check me-1"></i>Đổi mật khẩu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const btn = document.getElementById('btnDoiMatKhau');
+        const form = document.getElementById('formDoiMatKhau');
+        btn.addEventListener('click', () => {
+            if (form.style.display === "none") {
+                form.style.display = "block";
+                btn.innerHTML = '<i class="fas fa-times me-1"></i>Đóng form đổi mật khẩu';
+            } else {
+                form.style.display = "none";
+                btn.innerHTML = '<i class="fas fa-lock me-1"></i>Đổi mật khẩu';
+            }
+        });
+    });
+</script>

@@ -1,0 +1,143 @@
+﻿@model IEnumerable<WebTraSua.Models.NguyenLieu>
+@{
+    ViewData["Title"] = "Quản lý nguyên liệu";
+    ViewBag.Active = "NguyenLieuQuanLy";
+    var success = TempData["Success"]?.ToString();
+    var error = TempData["Error"]?.ToString();
+    var ton = ViewBag.TonDict as IDictionary<int, decimal> ?? new Dictionary<int, decimal>();
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-3 mb-3">
+            @await Html.PartialAsync("~/Views/Shared/_AdminSidebar.cshtml")
+        </div>
+
+        <!-- Nội dung chính -->
+        <div class="col-lg-9">
+            <h3 class="mb-3">📦 Quản lý nguyên liệu</h3>
+
+            @if (!string.IsNullOrEmpty(success))
+            {
+                <div class="alert alert-success">@success</div>
+            }
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <div class="alert alert-danger">@error</div>
+            }
+            <div class="d-flex justify-content-between mb-3">
+                <a class="btn btn-outline-primary" href="/SanPham">➡️ Về quản lý sản phẩm</a>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#mAdd">+ Thêm nguyên liệu</button>
+            </div>
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:90px">Mã</th>
+                        <th>Tên nguyên liệu</th>
+                        <th style="width:160px">Đơn vị</th>
+                        <th class="text-end" style="width:160px">Tồn hiện tại</th>
+                        <th style="width:200px">Công cụ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var n in Model)
+                    {
+                        var soTon = ton.TryGetValue(n.MaNL, out var t) ? t : 0m;
+                        <tr class="@(soTon <= 100 ? "table-warning" : "")">
+                            <td>@n.MaNL</td>
+                            <td>@n.TenNL</td>
+                            <td class="text-uppercase">@n.DonViTinh</td>
+                            <td class="text-end">@soTon.ToString("N2")</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm me-1"
+                                        data-bs-toggle="modal" data-bs-target="#mEdit"
+                                        data-id="@n.MaNL" data-ten="@n.TenNL" data-dvt="@n.DonViTinh">
+                                    🖉 Sửa
+                                </button>
+                                <form method="post" asp-action="Delete" class="d-inline"
+                                      onsubmit="return confirm('Xoá nguyên liệu này?')">
+                                    <input type="hidden" name="MaNL" value="@n.MaNL" />
+                                    <button class="btn btn-danger btn-sm">🗑️ Xoá</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm -->
+<div class="modal fade" id="mAdd" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="Create">
+                <div class="modal-header">
+                    <h5 class="modal-title">➕ Thêm nguyên liệu</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label">Tên nguyên liệu</label>
+                        <input name="TenNL" class="form-control" required />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Đơn vị</label>
+                        <select name="DonViTinh" class="form-select" required>
+                            <option value="ml">ml</option>
+                            <option value="g">g</option>
+                        </select>
+                        <div class="form-text">Chỉ “ml” hoặc “g”.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Huỷ</button>
+                    <button class="btn btn-success" type="submit">💾 Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa -->
+<div class="modal fade" id="mEdit" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="Edit">
+                <input type="hidden" name="MaNL" id="e_id" />
+                <div class="modal-header">
+                    <h5 class="modal-title">🛠️ Sửa nguyên liệu</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label">Tên nguyên liệu</label>
+                        <input name="TenNL" id="e_ten" class="form-control" required />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Đơn vị</label>
+                        <select name="DonViTinh" id="e_dvt" class="form-select" required>
+                            <option value="ml">ml</option>
+                            <option value="g">g</option>
+                        </select>
+                        <div class="form-text">Chỉ “ml” hoặc “g”.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Huỷ</button>
+                    <button class="btn btn-primary" type="submit">💾 Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('mEdit').addEventListener('show.bs.modal', e => {
+      const b = e.relatedTarget;
+      document.getElementById('e_id').value  = b.dataset.id;
+      document.getElementById('e_ten').value = b.dataset.ten;
+      document.getElementById('e_dvt').value = (b.dataset.dvt || '').toLowerCase();
+    });
+</script>

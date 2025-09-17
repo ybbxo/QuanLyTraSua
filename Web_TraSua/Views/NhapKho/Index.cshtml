@@ -1,0 +1,56 @@
+﻿@model IEnumerable<WebTraSua.Models.NhapKho>
+@{
+    ViewData["Title"] = "Nhập kho nguyên liệu";
+}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-3 mb-3">
+            @await Html.PartialAsync("~/Views/Shared/_AdminSidebar.cshtml")
+        </div>
+        <div class="col-lg-9">
+            <div class="card shadow-sm rounded-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">Nhập kho nguyên liệu</h4>
+                        <a asp-action="Create" class="btn btn-success">
+                            <i class="bi bi-plus-lg"></i> Thêm phiếu nhập
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Mã NK</th>
+                                    <th>Nguyên liệu</th>
+                                    <th class="text-end">Số lượng</th>
+                                    <th>Người nhập</th>
+                                    <th>Ngày nhập</th>
+                                    <th class="text-end">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var nk in Model)
+                                {
+                                    <tr>
+                                        <td>@nk.MaNK</td>
+                                        <td>@nk.NguyenLieu?.TenNL (@nk.NguyenLieu?.DonViTinh)</td>
+                                        <td class="text-end">@nk.SoLuong</td>
+                                        <td>@nk.NhanVien?.HoTen</td>
+                                        <td>@nk.NgayNhap.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td class="text-end">
+                                            <a asp-action="Edit" asp-route-id="@nk.MaNK" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                            <form asp-action="Delete" asp-route-id="@nk.MaNK" method="post" class="d-inline"
+                                                  onsubmit="return confirm('Xoá phiếu nhập này?');">
+                                                <button class="btn btn-sm btn-outline-danger">Xoá</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,37 @@
+﻿@model List<(int MaNL,string TenNL,string DVT,decimal Xuat)>
+@{
+    ViewData["Title"] = "Tiêu thụ nguyên liệu"; var from = (DateTime)ViewBag.From; var to = (DateTime)ViewBag.To;
+}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-3 mb-3">@await Html.PartialAsync("~/Views/Shared/_AdminSidebar.cshtml")</div>
+        <div class="col-lg-9">
+            <div class="card shadow-sm rounded-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Tiêu thụ nguyên liệu</h4>
+                    <form method="get" class="row g-2 mb-3">
+                        <div class="col-auto"><input type="date" name="tu" class="form-control" value="@from.ToString("yyyy-MM-dd")" /></div>
+                        <div class="col-auto"><input type="date" name="den" class="form-control" value="@to.ToString("yyyy-MM-dd")" /></div>
+                        <div class="col-auto"><button class="btn btn-primary">Lọc</button></div>
+                    </form>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead><tr><th>Mã</th><th>Nguyên liệu</th><th>ĐVT</th><th class="text-end">Xuất</th></tr></thead>
+                            <tbody>
+                                @foreach (var r in Model)
+                                {
+                                    <tr>
+                                        <td>@r.MaNL</td>
+                                        <td>@r.TenNL</td>
+                                        <td>@r.DVT</td>
+                                        <td class="text-end">@r.Xuat</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

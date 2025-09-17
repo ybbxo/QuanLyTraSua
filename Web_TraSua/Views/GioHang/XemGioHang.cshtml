@@ -1,0 +1,143 @@
+﻿@model List<WebTraSua.Models.GioHangItem>
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var tongTien = Model.Sum(m => m.ThanhTien);
+}
+<div class="container py-4">
+    <h1 class="text-center mb-4 fw-bold text-primary">
+        🛒 Giỏ hàng của bạn
+    </h1>
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-info text-center shadow-sm">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger text-center shadow-sm">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success text-center shadow-sm">@TempData["Success"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="text-center text-muted fs-5 py-5">
+            <i class="bi bi-cart-x fs-1 d-block mb-3"></i>
+            Giỏ hàng trống.
+        </div>
+    }
+    else
+    {
+        <!-- Danh sách sản phẩm -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Size</th>
+                                <th>Đơn giá</th>
+                                <th>Số lượng</th>
+                                <th>Thành tiền</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                  
+                                    <td class="fw-semibold">
+                                        <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@item.MaSP"
+                                           class="text-decoration-none text-dark">
+                                            @item.TenSP
+                                        </a>
+                                    </td>
+                                    <td><span class="badge bg-info text-dark">@item.TenSize</span></td>
+                                    <td>@item.DonGia.ToString("n0") đ</td>
+                                    <td>
+                                        <form asp-controller="GioHang" asp-action="CapNhat" method="post"
+                                              class="d-flex justify-content-center align-items-center">
+                                            <input type="hidden" name="MaSP" value="@item.MaSP" />
+                                            <input type="hidden" name="MaSize" value="@item.MaSize" />
+                                            <input type="number" name="SoLuong" value="@item.SoLuong" min="1"
+                                                   class="form-control form-control-sm text-center me-2 w-50 shadow-sm" />
+                                            <button type="submit" class="btn btn-sm btn-outline-primary rounded-circle shadow-sm" title="Cập nhật">
+                                                <i class="bi bi-arrow-repeat"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="fw-bold text-success">@item.ThanhTien.ToString("n0") đ</td>
+                                    <td>
+                                        <a asp-controller="GioHang" asp-action="XoaItem"
+                                           asp-route-masp="@item.MaSP" asp-route-masize="@item.MaSize"
+                                           class="btn btn-sm btn-outline-danger rounded-circle shadow-sm"
+                                           title="Xóa sản phẩm">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr class="fw-bold fs-5">
+                                <td colspan="5" class="text-end">Tổng cộng:</td>
+                                <td class="text-success">@tongTien.ToString("n0") đ</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end mb-4">
+            <a asp-controller="GioHang" asp-action="XoaHet" class="btn btn-outline-danger shadow-sm">
+                <i class="bi bi-trash3 me-1"></i> Xóa tất cả
+            </a>
+        </div>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-success text-white fw-bold">
+                📝 Thông tin đặt hàng
+            </div>
+            <div class="card-body">
+                <form asp-action="DatHang" method="post" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="TenKhachHang" placeholder="Tên khách hàng" required class="form-control shadow-sm" />
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="DiaChi" placeholder="Địa chỉ nhận hàng" required class="form-control shadow-sm" />
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="SoDienThoai" placeholder="Số điện thoại" required class="form-control shadow-sm" />
+                    </div>
+                    <input type="hidden" name="MaHTTT" value="1" />
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-success px-4 shadow-sm">
+                            ✅ Đặt hàng
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    <div class="text-center mt-4">
+        @{
+            var lastDanhMuc = Context.Session.GetInt32("LastDanhMuc");
+            if (lastDanhMuc != null)
+            {
+                <a asp-controller="SanPham" asp-action="DanhMuc" asp-route-id="@lastDanhMuc" class="btn btn-outline-secondary shadow-sm">
+                    ⬅️ Quay lại danh mục sản phẩm
+                </a>
+            }
+            else
+            {
+                <a asp-controller="SanPham" asp-action="DanhMuc" asp-route-id="1" class="btn btn-outline-secondary shadow-sm">
+                    ⬅️ Quay lại danh mục sản phẩm
+                </a>
+            }
+        }
+    </div>
+</div>

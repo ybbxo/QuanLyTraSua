@@ -1,0 +1,503 @@
+﻿@using WebTraSua.Models
+@using Microsoft.AspNetCore.Http
+@model IEnumerable<SanPham>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    var successMsg = TempData["Success"]?.ToString();
+    var errorMsg = TempData["Error"]?.ToString();
+    var role = Context.Session.GetString("Role");
+    var ctrl = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "");
+    var adminCtrls = new HashSet<string> { "QuanLy", "DanhMuc", "SanPham", "QuanLyDonHang", "NguyenLieuQuanLy", "KhuyenMai", "NhapKho", "ThongKe" ,"TonKho"};
+    string Active(string c) => string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: url('/images/hero_tra_sua.jpg') center center / cover no-repeat;
+    }
+    .admin-sidebar .list-group-item {
+        border: 0;
+        border-radius: 10px
+    }
+
+        .admin-sidebar .list-group-item.active {
+            background: #ffe7d6;
+            color: #b35b36;
+            font-weight: 700
+        }
+
+    .admin-sidebar .card {
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(0,0,0,.08)
+    }
+</style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<div class="container mt-4">
+    <div class="row g-3">
+        @if (role == "QuanLy" && adminCtrls.Contains(ctrl))
+        {
+            <div class="col-lg-3">
+                <div class="card admin-sidebar">
+                    <div class="card-header fw-bold">⚙️ Khu vực quản trị</div>
+                    <div class="list-group list-group-flush">
+                        <a class="list-group-item list-group-item-action @Active("QuanLy")" href="/QuanLy">🏠 Bảng điều khiển</a>
+                        <a class="list-group-item list-group-item-action @Active("DanhMuc")" href="/DanhMuc">📂 Quản lý danh mục</a>
+                        <a class="list-group-item list-group-item-action @Active("SanPham")" href="/SanPham">📦 Quản lý sản phẩm</a>
+                        <a class="list-group-item list-group-item-action @Active("QuanLyDonHang")" href="/QuanLyDonHang">🧾 Quản lý đơn hàng</a>
+                        <a class="list-group-item list-group-item-action @Active("BinhLuan")" href="/BinhLuan">💬 Quản lý bình luận</a>
+                        <a class="list-group-item list-group-item-action @Active("KhachHang")" href="/KhachHang">👤 Quản lý khách hàng</a>
+                        <a class="list-group-item @Active("NguyenLieuQuanLy")" href="/NguyenLieuQuanLy">📦 Nguyên liệu</a>
+                        <a class="list-group-item list-group-item-action @Active("NhapKho")" href="/NhapKho">📥 Nhập kho nguyên liệu</a>
+                        <a class="list-group-item list-group-item-action @Active("TonKho")" href="/TonKho">📥 Quản lý tồn kho nguyên liệu</a>
+                        <a class="list-group-item list-group-item-action @Active("ThongKe")" href="/ThongKe/DoanhThuTheoThang">📊 Doanh thu theo tháng</a>
+                        <a class="list-group-item list-group-item-action @Active("ThongKe")" href="/ThongKe/DoanhThuTheoNgay">📅 Doanh thu theo ngày</a>
+                    </div>
+                    <div class="card-body pt-0">
+                        <a class="btn btn-sm btn-outline-secondary w-100" href="/">↩ Về trang khách</a>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="col-lg-9">
+            <div class="p-4 bg-white rounded shadow border border-pink">
+
+                @if (!string.IsNullOrEmpty(successMsg))
+                {
+                    <div class="alert alert-success text-center">@successMsg</div>
+                }
+                @if (!string.IsNullOrEmpty(errorMsg))
+                {
+                    <div class="alert alert-danger text-center">@errorMsg</div>
+                    <script>
+                        window.addEventListener('load', () => {
+                          new bootstrap.Modal(document.getElementById('addSanPhamModal')).show();
+                        });
+                    </script>
+                }
+                <div class="d-flex justify-content-between mb-3">
+                    <a class="btn btn-outline-primary" href="/DanhMuc">➡️ Quản lý danh mục</a>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addSanPhamModal">+ Thêm mới</button>
+                </div>
+
+                <table class="table table-bordered table-hover">
+                    <thead class="table-danger text-center">
+                        <tr>
+                            <th>Mã SP</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Giá bán</th>
+                            <th>Danh mục</th>
+                            <th>Size</th>
+                            <th style="width:160px;">Công cụ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.MaSP</td>
+                                <td>@item.TenSP</td>
+                                <td class="align-middle">
+                                    @{
+                                        var sizes = item.SanPhamSizes;
+                                        var giaMin = sizes?.Min(s => s.Gia);
+                                        var giaMax = sizes?.Max(s => s.Gia);
+                                    }
+                                    @if (sizes != null && sizes.Any())
+                                    {
+                                        if (giaMin == giaMax)
+                                        {
+                                            @($"{giaMin?.ToString("N0")} đ")
+                                        }
+                                        else
+                                        {
+                                            @($"{giaMin?.ToString("N0")} đ – {giaMax?.ToString("N0")} đ")
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span>Không có</span>
+                                    }
+                                </td>
+                                <td>@item.DanhMuc?.TenDM</td>
+                                <td class="align-middle">
+                                    @if (item.SanPhamSizes != null && item.SanPhamSizes.Any())
+                                    {
+                                        <span>@string.Join(" | ", item.SanPhamSizes.Select(s => $"{s.Size.TenSize} - {s.Gia.ToString("N0")} đ"))</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Không có</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-warning btn-sm me-1" onclick="editSanPham(@item.MaSP)">🖉 Sửa</button>
+                                    <a class="btn btn-danger btn-sm" href="/SanPham/Delete/@item.MaSP" onclick="return confirm('Bạn chắc chắn muốn xoá?')">🗑️ Xoá</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm sản phẩm -->
+<div class="modal fade" id="addSanPhamModal" tabindex="-1" aria-labelledby="addSanPhamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <form asp-action="Create" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSanPhamModalLabel">➕ Thêm sản phẩm mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tên sản phẩm</label>
+                                <input name="TenSP" id="txtTenSP" class="form-control" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Danh mục</label>
+                                <select name="MaDM" id="addMaDM" class="form-select" required>
+                                    <option disabled selected>-- Chọn danh mục --</option>
+                                    @foreach (var dm in ViewBag.DanhMucs)
+                                    {
+                                        <option value="@dm.MaDM">@dm.TenDM</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Chọn size</label>
+                                <div class="d-flex flex-column gap-2">
+                                    @for (int i = 0; i < (ViewBag.SizeList as List<SizeGiaModel>).Count; i++)
+                                    {
+                                        var size = (ViewBag.SizeList as List<SizeGiaModel>)[i];
+                                        <div class="form-check d-flex align-items-center mb-2">
+                                            <input type="hidden" name="Sizes[@i].MaSize" value="@size.MaSize" />
+                                            <input type="hidden" name="Sizes[@i].TenSize" value="@size.TenSize" />
+                                            <input class="form-check-input me-2 size-cb" type="checkbox" name="Sizes[@i].DuocChon"
+                                                   value="true" id="size-@size.MaSize" checked />
+                                            <label class="form-check-label me-3" for="size-@size.MaSize">@size.TenSize</label>
+                                            <input type="number" step="100" class="form-control form-control-sm w-50 gia-input"
+                                                   name="Sizes[@i].Gia" value="0"
+                                                   data-masize="@size.MaSize" data-tensize="@size.TenSize" />
+                                        </div>
+                                    }
+                                    <div class="small text-muted mt-1">
+                                        Ước tính: M = <span id="estM">0</span> đ | L = <span id="estL">0</span> đ
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0">Công thức (base = size S)</label>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddRow">+ Nguyên liệu</button>
+                            </div>
+                            <div class="table-responsive border rounded">
+                                <table class="table table-sm align-middle mb-0" id="tblCongThuc">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width:52%">Nguyên liệu</th>
+                                            <th style="width:16%">Đơn vị</th>
+                                            <th style="width:22%">SL (base)</th>
+                                            <th style="width:10%"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                                <div class="mt-2 small">
+                                    Ước tính chất lỏng:
+                                    M = <strong id="mlM">0</strong>/<strong id="capM">0</strong> ml,
+                                    L = <strong id="mlL">0</strong>/<strong id="capL">0</strong> ml
+                                </div>
+                            </div>
+                            <div class="mt-2 small">
+                                Tổng chất lỏng (base S): <strong id="sumMl">0</strong>/<strong id="capMl">@ViewBag.DungTichS</strong> ml
+                            </div>
+                            <div class="card shadow-sm mt-3">
+                                <div class="card-header py-2">👀 Xem trước — Dữ liệu sẽ lưu</div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width:15%">Nhóm</th>
+                                                    <th style="width:45%">Tên</th>
+                                                    <th style="width:15%">Đơn vị</th>
+                                                    <th class="text-end" style="width:15%">SL/Giá</th>
+                                                    <th class="text-center" style="width:10%">Chọn</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="pvUnifiedBody">
+                                                <tr class="text-muted"><td colspan="5">Chưa có dữ liệu.</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div> 
+                    </div> 
+                </div> 
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-success">💾 Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal sửa -->
+<div class="modal fade" id="editSanPhamModal" tabindex="-1" aria-labelledby="editSanPhamModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="EditFromIndex">
+                <input type="hidden" name="MaSP" id="editMaSP" />
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editSanPhamModalLabel">🛠️ Sửa sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên sản phẩm</label>
+                        <input name="TenSP" id="editTenSP" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Danh mục</label>
+                        <select name="MaDM" id="editMaDM" class="form-select" required>
+                            <option disabled selected>-- Chọn danh mục --</option>
+                            @foreach (var dm in ViewBag.DanhMucs)
+                            {
+                                <option value="@dm.MaDM">@dm.TenDM</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giá size S (base)</label>
+                        <input type="number" name="GiaS" id="editGiaS" class="form-control" step="100" min="0" required />
+                        <div class="form-text">M, L sẽ tự tính theo hệ số trong SQL.</div>
+                    </div>
+                    <div class="mb-2">
+                        <small>Ước tính: M = <span id="estM_edit">0</span> đ | L = <span id="estL_edit">0</span> đ</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary">💾 Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        const SIZE_META   = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SizeMeta));
+        const NGUYEN_LIEU = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.NguyenLieus ?? new object[0]));
+        const baseSize = SIZE_META.find(s => s.IsBase);
+        const mSize    = SIZE_META.find(s => s.TenSize === 'M');
+        const lSize    = SIZE_META.find(s => s.TenSize === 'L');
+        const inputGiaById = {};
+        document.querySelectorAll('.gia-input').forEach(inp => { inputGiaById[+inp.dataset.masize] = inp; });
+        const estM = document.getElementById('estM');
+        const estL = document.getElementById('estL');
+        function roundTo1k(v){ return Math.round(v/1000)*1000; }
+        function updateGiaFromS(){
+          if (!baseSize || !inputGiaById[baseSize.MaSize]) return;
+          const s = parseInt(inputGiaById[baseSize.MaSize].value || '0');
+          SIZE_META.forEach(sz => {
+            if (sz.IsBase) return;
+            const t = inputGiaById[sz.MaSize]; if (!t) return;
+            const val = roundTo1k(s * Number(sz.HeSoGia) + Number(sz.PhuThu));
+            t.value = val;
+            if (sz.TenSize === 'M' && estM) estM.textContent = val.toLocaleString();
+            if (sz.TenSize === 'L' && estL) estL.textContent = val.toLocaleString();
+          });
+          renderUnifiedPreview();
+        }
+        if (baseSize && inputGiaById[baseSize.MaSize]) {
+          inputGiaById[baseSize.MaSize].addEventListener('input', updateGiaFromS);
+        }
+        const tbody = document.querySelector('#tblCongThuc tbody');
+        const btnAddRow = document.getElementById('btnAddRow');
+        const unitByNL = Object.fromEntries((NGUYEN_LIEU||[]).map(n => [n.MaNL, (n.DonViTinh || '').toLowerCase()]));
+        const sumMl = document.getElementById('sumMl');
+        const capMl = document.getElementById('capMl');
+        const mlM = document.getElementById('mlM'), capM = document.getElementById('capM');
+        const mlL = document.getElementById('mlL'), capL = document.getElementById('capL');
+        if (mSize && capM) capM.textContent = mSize.DungTichML;
+        if (lSize && capL) capL.textContent = lSize.DungTichML;
+        function renderNL(){ return (NGUYEN_LIEU||[]).map(n => `<option value="${n.MaNL}">${n.TenNL}</option>`).join(''); }
+        function wireRow(tr){
+          const sel  = tr.querySelector('.sel-nl');
+          const unit = tr.querySelector('.txt-unit');
+          const qty  = tr.querySelector('.txt-qty');
+          sel.addEventListener('change', () => { unit.value = unitByNL[+sel.value] || ''; calcMl(); renderUnifiedPreview(); });
+          qty.addEventListener('input',  () => { calcMl(); renderUnifiedPreview(); });
+          tr.querySelector('.btn-del').addEventListener('click', () => { tr.remove(); reindexRows(); calcMl(); renderUnifiedPreview(); });
+        }
+        function addRow(){
+          const i = tbody.querySelectorAll('tr').length;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <select class="form-select form-select-sm sel-nl" name="CongThuc[${i}].MaNL" required>
+                <option value="">-- Chọn nguyên liệu --</option>
+                ${renderNL()}
+              </select>
+            </td>
+            <td><input class="form-control form-control-sm txt-unit" name="CongThuc[${i}].DonViTinh" value="" readonly /></td>
+            <td><input type="number" step="0.1" min="0" class="form-control form-control-sm txt-qty" name="CongThuc[${i}].SoLuongCoSo" /></td>
+            <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-del">✕</button></td>`;
+          tbody.appendChild(tr); wireRow(tr);
+        }
+        function reindexRows(){
+          tbody.querySelectorAll('tr').forEach((tr,i)=>{
+            tr.querySelectorAll('select, input').forEach(el=>{
+              const name = el.getAttribute('name'); if(!name) return;
+              el.setAttribute('name', name.replace(/CongThuc\[\d+\]\./, `CongThuc[${i}].`));
+            });
+          });
+        }
+        function calcMl(){
+          let base = 0;
+          tbody.querySelectorAll('tr').forEach(tr=>{
+            const sel = tr.querySelector('.sel-nl');
+            const qty = parseFloat(tr.querySelector('.txt-qty')?.value || '0');
+            const unit = unitByNL[+sel?.value] || '';
+            if (unit === 'ml') base += qty;
+          });
+          if (sumMl && capMl){
+            sumMl.textContent = base.toFixed(1);
+            const cap = Number(capMl.textContent || 0);
+            sumMl.classList.toggle('text-danger', base > cap);
+            sumMl.classList.toggle('fw-bold',     base > cap);
+          }
+          if (mSize && mlM && capM){
+            const vM = +(base * Number(mSize.HeSoDinhLuong)).toFixed(1);
+            mlM.textContent = vM; mlM.classList.toggle('text-danger', vM > Number(capM.textContent || 0));
+          }
+          if (lSize && mlL && capL){
+            const vL = +(base * Number(lSize.HeSoDinhLuong)).toFixed(1);
+            mlL.textContent = vL; mlL.classList.toggle('text-danger', vL > Number(capL.textContent || 0));
+          }
+        }
+        function renderUnifiedPreview(){
+          const body = document.getElementById('pvUnifiedBody');
+          if (!body) return;
+          const rows = [];
+          const ten = (document.getElementById('txtTenSP')?.value || '').trim() || '—';
+          const dmSel = document.getElementById('addMaDM');
+          const tenDM = (dmSel && dmSel.value) ? dmSel.options[dmSel.selectedIndex].text : '—';
+          rows.push(`<tr class="table-light">
+            <td colspan="5"><small class="text-muted">Sản phẩm: <strong>${ten}</strong> — Danh mục: <strong>${tenDM}</strong></small></td>
+          </tr>`);
+          document.querySelectorAll('.size-cb').forEach(cb=>{
+            const wrap  = cb.closest('.form-check');
+            const label = wrap?.querySelector('label')?.textContent?.trim() || '';
+            const price = parseInt(wrap?.querySelector('.gia-input')?.value || '0');
+            rows.push(`
+              <tr>
+                <td>Size</td>
+                <td>${label}</td>
+                <td></td>
+                <td class="text-end">${price.toLocaleString()} đ</td>
+                <td class="text-center">${cb.checked ? '✔️' : '—'}</td>
+              </tr>
+            `);
+          });
+          tbody.querySelectorAll('tr').forEach(tr=>{
+            const sel  = tr.querySelector('.sel-nl');
+            if (!sel?.value) return;
+            const tenNL = sel.options[sel.selectedIndex]?.text?.trim() || `#${sel.value}`;
+            const unit  = (tr.querySelector('.txt-unit')?.value || '').toLowerCase();
+            const qty   = parseFloat(tr.querySelector('.txt-qty')?.value || '0');
+            rows.push(`
+              <tr>
+                <td>Nguyên liệu</td>
+                <td>${tenNL}</td>
+                <td>${unit}</td>
+                <td class="text-end">${(qty||0).toFixed(unit==='ml'?1:2)}</td>
+                <td class="text-center">—</td>
+              </tr>
+            `);
+          });
+          body.innerHTML = rows.length ? rows.join('') : `<tr class="text-muted"><td colspan="5">Chưa có dữ liệu.</td></tr>`;
+        }
+        const editGiaS   = document.getElementById('editGiaS');
+        const estM_edit  = document.getElementById('estM_edit');
+        const estL_edit  = document.getElementById('estL_edit');
+        function updateGiaFromSEdit(){
+          if (!editGiaS) return;
+          const s = parseInt(editGiaS.value || '0');
+          const mMeta = SIZE_META.find(x => x.TenSize === 'M');
+          const lMeta = SIZE_META.find(x => x.TenSize === 'L');
+          const mVal = mMeta ? roundTo1k(s * Number(mMeta.HeSoGia) + Number(mMeta.PhuThu)) : 0;
+          const lVal = lMeta ? roundTo1k(s * Number(lMeta.HeSoGia) + Number(lMeta.PhuThu)) : 0;
+          if (estM_edit) estM_edit.textContent = mVal.toLocaleString();
+          if (estL_edit) estL_edit.textContent = lVal.toLocaleString();
+        }
+        editGiaS?.addEventListener('input', updateGiaFromSEdit);
+        async function editSanPham(maSP){
+          const modalEl = document.getElementById('editSanPhamModal');
+          const bsModal = new bootstrap.Modal(modalEl);
+          try{
+            const r = await fetch(`/SanPham/GetSanPhamJson/${maSP}`);
+            if(!r.ok) throw new Error('Không lấy được thông tin sản phẩm');
+            const sp = await r.json();
+            document.getElementById('editMaSP').value  = sp.maSP;
+            document.getElementById('editTenSP').value = sp.tenSP;
+            document.getElementById('editMaDM').value  = sp.maDM;
+            const base = (sp.sizes || []).find(x => x.maSize === (baseSize?.MaSize));
+            document.getElementById('editGiaS').value = base ? base.gia : 0;
+            updateGiaFromSEdit();
+            bsModal.show();
+          }catch(e){ alert('Không mở được form sửa: ' + e.message); }
+        }
+        document.getElementById('btnAddRow')?.addEventListener('click', () => { addRow(); renderUnifiedPreview(); });
+        if (tbody && tbody.children.length === 0) { addRow(); }
+        document.getElementById('addSanPhamModal')?.addEventListener('shown.bs.modal', () => {
+          updateGiaFromS(); calcMl(); renderUnifiedPreview();
+        });
+        document.querySelectorAll('.size-cb').forEach(cb => cb.addEventListener('change', renderUnifiedPreview));
+        document.querySelectorAll('.gia-input').forEach(inp => inp.addEventListener('input', renderUnifiedPreview));
+        document.getElementById('addMaDM')?.addEventListener('change', renderUnifiedPreview);
+        document.getElementById('txtTenSP')?.addEventListener('input', renderUnifiedPreview);
+        document.getElementById('tblCongThuc')?.addEventListener('change', e => {
+          if (e.target.matches('.sel-nl')) { calcMl(); renderUnifiedPreview(); }
+        });
+        document.getElementById('tblCongThuc')?.addEventListener('input', e => {
+          if (e.target.matches('.txt-qty')) { calcMl(); renderUnifiedPreview(); }
+        });
+        async function reloadNguyenLieu(){
+          try{
+            const res = await fetch('/api/nguyenlieu/all');
+            if(!res.ok) throw new Error('Không tải được nguyên liệu');
+            const data = await res.json();
+            window.NGUYEN_LIEU = data;
+            window.unitByNL = Object.fromEntries((data||[]).map(n => [n.MaNL, (n.DonViTinh || '').toLowerCase()]));
+            document.querySelectorAll('#tblCongThuc tbody .sel-nl').forEach(sel => {
+              const current = sel.value;
+              sel.innerHTML = `<option value="">-- Chọn nguyên liệu --</option>` +
+                (data||[]).map(n => `<option value="${n.MaNL}">${n.TenNL}</option>`).join('');
+              if(current) sel.value = current;
+              sel.dispatchEvent(new Event('change'));
+            });
+            alert('Đã làm mới danh sách nguyên liệu.');
+          }catch(e){
+            alert('Lỗi: ' + e.message);
+          }
+        }
+        document.getElementById('btnReloadNL')?.addEventListener('click', reloadNguyenLieu);
+    </script>
+}

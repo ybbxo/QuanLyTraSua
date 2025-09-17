@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Trang Chủ";
+}
+@section Hero {
+    <div id="homeCarousel" class="carousel slide carousel-fade hero" data-bs-ride="carousel" data-bs-interval="4000" data-bs-wrap="true">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="1"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="/images/banner1.jpg" class="d-block w-100 hero-img" alt="Banner 1">
+                <div class="carousel-caption d-none d-md-block animate__animated animate__fadeInUp">
+                    <h2 class="fw-bold">Khám phá hương vị mới</h2>
+                    <p>Trà sữa chuẩn vị - Tươi ngon mỗi ngày.</p>
+                    <a href="/SanPham/DanhMuc/1" class="btn btn-cta">Mua ngay</a>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="/images/banner2.jpg" class="d-block w-100 hero-img" alt="Banner 2">
+                <div class="carousel-caption d-none d-md-block animate__animated animate__fadeInUp">
+                    <h2 class="fw-bold">Thưởng thức ngay</h2>
+                    <p>Đặt hàng nhanh chóng, giao tận nơi.</p>
+                    <a href="/Account/Register" class="btn btn-cta">Đăng ký ngay</a>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+            <span class="visually-hidden">Trước</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+            <span class="visually-hidden">Sau</span>
+        </button>
+    </div>
+}

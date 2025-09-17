@@ -1,0 +1,134 @@
+﻿@model List<WebTraSua.Models.HoaDon>
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    var trangThaiSelected = Context.Request.Query["trangThai"].ToString();
+    var searchText = Context.Request.Query["search"].ToString();
+    var trangThaiOptions = new Dictionary<string, string>
+    {
+        { "", "Tất cả" },
+        { "ChoXacNhan", "Chờ xác nhận" },
+        { "HoanTat", "Hoàn tất" },
+        { "Huy", "Hủy" }
+    };
+    var role = Context.Session.GetString("Role");
+    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var adminCtrls = new HashSet<string> { "QuanLy", "DanhMuc", "SanPham", "QuanLyDonHang", "NguyenLieuQuanLy", "KhuyenMai", "NhapKho", "ThongKe" ,"TonKho"};
+    string Active(string c) => string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+<div class="container-fluid">
+    <div class="row">
+        @if (role == "QuanLy" && adminCtrls.Contains(ctrl))
+        {
+            <div class="col-md-2 mb-3">
+                <div class="card admin-sidebar">
+                    <div class="card-header fw-bold">⚙️ Khu vực quản trị</div>
+                    <div class="list-group list-group-flush">
+                        <a class="list-group-item list-group-item-action @Active("QuanLy")" href="/QuanLy">🏠 Bảng điều khiển</a>
+                        <a class="list-group-item list-group-item-action @Active("DanhMuc")" href="/DanhMuc">📂 Quản lý danh mục</a>
+                        <a class="list-group-item list-group-item-action @Active("SanPham")" href="/SanPham">📦 Quản lý sản phẩm</a>
+                        <a class="list-group-item list-group-item-action @Active("QuanLyDonHang")" href="/QuanLyDonHang">🧾 Quản lý đơn hàng</a>
+                        <a class="list-group-item list-group-item-action @Active("BinhLuan")" href="/BinhLuan">💬 Quản lý bình luận</a>
+                        <a class="list-group-item list-group-item-action @Active("KhachHang")" href="/KhachHang">👤 Quản lý khách hàng</a>
+                        <a class="list-group-item list-group-item-action @Active("NguyenLieuQuanLy")" href="/NguyenLieuQuanLy">📦 Nguyên liệu</a>
+                        <a class="list-group-item list-group-item-action @Active("NhapKho")" href="/NhapKho">📥 Nhập kho nguyên liệu</a>
+                        <a class="list-group-item list-group-item-action @Active("TonKho")" href="/TonKho">📥 Quản lý tồn kho nguyên liệu</a>
+                        <a class="list-group-item list-group-item-action @Active("ThongKe")" href="/ThongKe/DoanhThuTheoThang">📊 Doanh thu theo tháng</a>
+                        <a class="list-group-item list-group-item-action @Active("ThongKe")" href="/ThongKe/DoanhThuTheoNgay">📅 Doanh thu theo ngày</a>
+                    </div>
+                    <div class="card-body pt-0">
+                        <a class="btn btn-sm btn-outline-secondary w-100" href="/">↩ Về trang khách</a>
+                    </div>
+                </div>
+            </div>
+        }
+        @* Nội dung chính *@
+        <div class="col-md-10">
+            <h2 class="mb-4">Quản lý đơn hàng</h2>
+            <form method="get" class="row g-3 mb-4 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select class="form-select" name="trangThai">
+                        @foreach (var opt in trangThaiOptions)
+                        {
+                            if (trangThaiSelected == opt.Key)
+                            {
+                                <option value="@opt.Key" selected>@opt.Value</option>
+                            }
+                            else
+                            {
+                                <option value="@opt.Key">@opt.Value</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tìm khách hàng</label>
+                    <input type="text" class="form-control" name="search" value="@searchText" placeholder="Tên khách hàng..." />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                </div>
+            </form>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Mã HD</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày lập</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dh in Model)
+                        {
+                            <tr>
+                                <td>@dh.MaHD</td>
+                                <td>@(dh.KhachHang?.HoTen ?? dh.TenNguoiNhan ?? "Khách lẻ")</td>
+                                <td>@dh.NgayLap.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="text-success fw-bold text-end">@($"{dh.TongTien:N0} VNĐ")</td>
+                                <td>
+                                    <span class="badge
+                                            @(dh.TrangThai == "HoanTat" ? "bg-success" :
+                                                                                    dh.TrangThai == "ChoXacNhan" ? "bg-warning text-dark" :
+                                                                                    dh.TrangThai == "Huy" ? "bg-danger" : "bg-secondary")">
+                                    @dh.TrangThai
+                                </span>
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-info mb-1" href="@Url.Action("Details", "QuanLyDonHang", new { id = dh.MaHD })">Xem chi tiết</a>
+                                <select class="form-select form-select-sm" onchange="capNhatTrangThai(@dh.MaHD, this.value)">
+                                    <option value="">--Cập nhật--</option>
+                                    <option value="ChoXacNhan">Chờ xác nhận</option>
+                                    <option value="HoanTat">Hoàn tất</option>
+                                    <option value="Huy">Hủy</option>
+                                </select>
+                            </td>
+                        </tr>
+                         }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function capNhatTrangThai(maHD, trangThaiMoi) {
+            if (!trangThaiMoi) return;
+            $.post('@Url.Action("CapNhatTrangThai", "QuanLyDonHang")', { maHD: maHD, trangThaiMoi: trangThaiMoi })
+                .done(function(res) {
+                    alert(res.message);
+                    if(res.success) location.reload();
+                })
+                .fail(function() {
+                    alert("Có lỗi xảy ra, vui lòng thử lại.");
+                });
+        }
+    </script>
+}

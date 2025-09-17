@@ -1,0 +1,66 @@
+﻿@model WebTraSua.Models.NhapKho
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Sửa phiếu nhập kho";
+    var allNL = ViewBag.AllNguyenLieu as List<WebTraSua.Models.NguyenLieu> ?? new();
+    var allNV = ViewBag.AllNhanVien as List<WebTraSua.Models.NhanVien> ?? new();
+    var nlItems = allNL.Select(x => new SelectListItem
+            {
+                Value = x.MaNL.ToString(),
+                Text = $"{x.TenNL} ({x.DonViTinh})",
+                Selected = (x.MaNL == Model.MaNL)
+            }).ToList();
+    var nvItems = allNV.Select(x => new SelectListItem
+            {
+                Value = x.MaNV.ToString(),
+                Text = x.HoTen,
+                Selected = (x.MaNV == Model.MaNV)
+            }).ToList();
+}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-3 mb-3">
+            @await Html.PartialAsync("~/Views/Shared/_AdminSidebar.cshtml")
+        </div>
+        <div class="col-lg-9">
+            <div class="card shadow-sm rounded-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Sửa phiếu nhập: #@Model.MaNK</h4>
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="MaNK" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+                        <div class="mb-3">
+                            <label class="form-label">Nguyên liệu</label>
+                            <select class="form-select" asp-for="MaNL" asp-items="@(nlItems)" required></select>
+                            <span asp-validation-for="MaNL" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Số lượng</label>
+                            <input asp-for="SoLuong" type="number" min="1" step="1" class="form-control" required />
+                            <span asp-validation-for="SoLuong" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nhân viên nhập</label>
+                            <select class="form-select" asp-for="MaNV" asp-items="@(nvItems)" required></select>
+                            <span asp-validation-for="MaNV" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ngày nhập</label>
+                            <input asp-for="NgayNhap" type="datetime-local" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                            <span asp-validation-for="NgayNhap" class="text-danger"></span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Lưu</button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">Huỷ</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

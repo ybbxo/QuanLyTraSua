@@ -1,0 +1,235 @@
+﻿@model WebTraSua.ViewModels.KhachHangDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết khách hàng";
+}
+<div class="container py-4">
+    <h2 class="mb-4">💼 Chi tiết khách hàng: @(Model?.KhachHang?.HoTen ?? "—")</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">Thông tin cơ bản</div>
+                <div class="card-body">
+                    <p><strong>Họ tên:</strong> <span id="txtHoTen">@(Model?.KhachHang?.HoTen ?? "—")</span></p>
+                    <p><strong>Email:</strong> <span id="txtEmail">@(Model?.KhachHang?.Email ?? "—")</span></p>
+                    <p>
+                        <strong>SDT:</strong>
+                        <span id="txtSDT">
+                            @(string.IsNullOrWhiteSpace(Model?.KhachHang?.SDT) ? "Chưa có" : Model.KhachHang.SDT)
+                        </span>
+                    </p>
+                    <p><strong>Điểm tích lũy:</strong> <span id="txtDiem">@((Model?.KhachHang?.DiemTichLuy ?? 0))</span></p>
+                    <p><strong>Ngày tạo:</strong> @(Model?.KhachHang?.NgayTao.ToString("yyyy-MM-dd") ?? "—")</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">Hành động</div>
+                <div class="card-body d-flex flex-column gap-2">
+                    <button type="button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#editModal">✏️ Chỉnh sửa</button>
+                    <button type="button" class="btn btn-danger w-100" onclick="xoa(@(Model?.KhachHang?.MaKH ?? 0))">🗑 Xóa</button>
+                    <a href="@Url.Action("Index", "KhachHang")" class="btn btn-secondary w-100">↩ Quay lại</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h4>📄 Danh sách đơn hàng</h4>
+    @if (Model?.HoaDons != null && Model.HoaDons.Any())
+    {
+        <div class="table-responsive shadow-sm rounded mb-4">
+            <table class="table table-hover align-middle bg-white">
+                <thead class="table-dark">
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã đơn</th>
+                        <th>Ngày tạo</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ var stt = 0; }
+                    @foreach (var hd in Model.HoaDons)
+                    {
+                        <tr>
+                            <td>@(++stt)</td>
+                            <td>@hd.MaHD</td>
+                            <td>@hd.NgayLap.ToString("yyyy-MM-dd")</td>
+                            <td>@hd.TongTien.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))
+                            <td>
+                                @{
+                                    var (cls, txt) = hd.TrangThai switch
+                                    {
+                                        "HoanTat"    => ("bg-success", "Hoàn tất"),
+                                        "Huy"        => ("bg-danger",  "Hủy"),
+                                        "DangGiao"   => ("bg-warning text-dark", "Đang giao"),
+                                        "ChoXacNhan" => ("bg-secondary", "Chờ xác nhận"),
+                                        _            => ("bg-secondary", "Không rõ")
+                                    };
+                                }
+                                <span id="badgeTrangThai_@hd.MaHD" class="badge @cls">@txt</span>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("ChiTiet", "HoaDon", new { id = hd.MaHD })" class="btn btn-sm btn-info">Chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <h3>Đơn hàng của khách hàng</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Mã HD</th>
+                        <th>Ngày tạo</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var hd in Model.HoaDons)
+                    {
+                        <tr>
+                            <td>@hd.MaHD</td>
+                            <td>@hd.NgayLap.ToString("yyyy-MM-dd")</td>
+                            <td>@hd.TongTien.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))
+
+                            <td>
+                                @{
+                                    var cls = "bg-secondary";
+                                    var txt = "Chờ xác nhận";
+
+                                    if (hd.TrangThai == "HoanTat")
+                                    {
+                                        cls = "bg-success"; txt = "Hoàn tất";
+                                    }
+                                    else if (hd.TrangThai == "Huy")
+                                    {
+                                        cls = "bg-danger"; txt = "Hủy";
+                                    }
+                                    else if (hd.TrangThai == "DangGiao")
+                                    {
+                                        cls = "bg-warning text-dark"; txt = "Đang giao";
+                                    }
+                                    else if (hd.TrangThai == "ChoXacNhan")
+                                    {
+                                        cls = "bg-secondary"; txt = "Chờ xác nhận";
+                                    }
+                                }
+                                <span id="badgeTrangThai_@hd.MaHD" class="badge @cls">@txt</span>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p>Khách hàng chưa có đơn hàng nào.</p>
+    }
+</div>
+
+<!-- Modal chỉnh sửa -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa khách hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="khMaKH" value="@(Model?.KhachHang?.MaKH ?? 0)" />
+                    <div class="mb-3">
+                        <label>Họ tên</label>
+                        <input type="text" id="khHoTen" class="form-control" value="@(Model?.KhachHang?.HoTen ?? "")" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input type="email" id="khEmail" class="form-control" value="@(Model?.KhachHang?.Email ?? "")" />
+                    </div>
+                    <div class="mb-3">
+                        <label>SDT</label>
+                        <input type="text" id="khSDT" class="form-control" value="@(Model?.KhachHang?.SDT ?? "")" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Điểm tích lũy</label>
+                        <input type="number" id="khDiem" class="form-control" value="@(Model?.KhachHang?.DiemTichLuy ?? 0)" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="capNhat()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function xoa(id){
+            if(!confirm("Bạn có chắc muốn xóa khách hàng này?")) return;
+            $.post('@Url.Action("Xoa", "KhachHang")',{ id: id })
+             .done(r=>{ alert(r.message); if(r.success) location.href='@Url.Action("Index", "KhachHang")'; })
+             .fail(()=>alert("Có lỗi xảy ra!"));
+        }
+        function capNhat(){
+            var kh = {
+                MaKH: $("#khMaKH").val(),
+                HoTen: $("#khHoTen").val(),
+                Email: $("#khEmail").val(),
+                SDT: $("#khSDT").val(),
+                DiemTichLuy: parseInt($("#khDiem").val() || "0")
+            };
+
+            $.post('@Url.Action("CapNhat", "KhachHang")', kh)
+            .done(r=>{
+                alert(r.message);
+                if(r.success){
+                    $("#txtHoTen").text(kh.HoTen);
+                    $("#txtEmail").text(kh.Email);
+                    $("#txtSDT").text(kh.SDT);
+                    $("#txtDiem").text(kh.DiemTichLuy);
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                    modal?.hide();
+                }
+            })
+            .fail(()=>alert("Có lỗi xảy ra!"));
+        }
+        function capNhatTrangThaiDonHang(maHD, trangThaiMoi) {
+            if (!confirm("Bạn có muốn thay đổi trạng thái đơn hàng?")) return;
+
+            $.post('@Url.Action("CapNhatTrangThaiDonHang", "KhachHang")',
+                { maHD: maHD, trangThaiMoi: trangThaiMoi })
+                .done(function (r) {
+                    alert(r.message);
+                    if (r.success) {
+                        const badge = document.querySelector(`#badgeTrangThai_${maHD}`);
+                        if (!badge) return;
+
+                        let cls = "bg-secondary", txt = "Chờ xác nhận";
+                        switch (trangThaiMoi) {
+                            case "HoanTat":  cls = "bg-success";             txt = "Hoàn tất"; break;
+                            case "Huy":      cls = "bg-danger";              txt = "Hủy"; break;
+                            case "DangGiao": cls = "bg-warning text-dark";   txt = "Đang giao"; break;
+                            case "ChoXacNhan":
+                            default:         cls = "bg-secondary";           txt = "Chờ xác nhận"; break;
+                        }
+                        badge.className = `badge ${cls}`;
+                        badge.innerText = txt;
+                    }
+                })
+                .fail(function () {
+                    alert("Có lỗi xảy ra!");
+                });
+        }
+    </script>
+}

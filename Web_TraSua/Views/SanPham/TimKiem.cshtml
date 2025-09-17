@@ -1,0 +1,331 @@
+﻿@model IEnumerable<WebTraSua.Models.SanPham>
+
+<h2>Kết quả tìm kiếm: "@ViewBag.Keyword"</h2>
+<style>
+    body {
+        background: linear-gradient(135deg,#fff8f0,#ffe7d6);
+        min-height: 100vh;
+        margin: 0
+    }
+
+    .card {
+        border: 0;
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(0,0,0,.08);
+        overflow: hidden;
+        transition: .15s;
+        background: #fff
+    }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 36px rgba(0,0,0,.12)
+        }
+
+    .card-img-top {
+        height: 220px;
+        width: 100%;
+        object-fit: cover;
+        display: block;
+        background: #f9f5ef
+    }
+
+    .price {
+        font-weight: 700;
+        color: #ff7b54
+    }
+
+    .muted {
+        color: #6c757d
+    }
+
+    .btn-outline-primary {
+        border-radius: 999px;
+        font-weight: 700
+    }
+
+    h2.section-title {
+        font-weight: 900;
+        letter-spacing: .3px;
+        margin: 10px 0 24px
+    }
+
+
+    .modal-dialog {
+        max-width: 1360px
+    }
+    /* to hơn */
+    .two-col {
+        display: grid;
+        grid-template-columns: 62% 38%; /* trái / phải */
+        column-gap: 24px;
+        align-items: start;
+    }
+
+        .two-col .left, .two-col .right {
+            min-width: 0
+        }
+    /* tránh tràn làm chồng đè */
+    .cart-body-scroll {
+        max-height: 520px;
+        overflow: auto
+    }
+    /* giỏ to & có cuộn */
+    .table td, .table th {
+        vertical-align: middle
+    }
+
+    .nowrap {
+        white-space: nowrap
+    }
+
+    .truncate {
+        max-width: 260px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis
+    }
+
+    .disabled-link {
+        pointer-events: none;
+        opacity: .6
+    }
+</style>
+
+<h2 class="text-center section-title">Sản phẩm</h2>
+@if (!Model.Any())
+{
+    <p class="text-danger">❌ Không tìm thấy sản phẩm nào.</p>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var sp in Model)
+        {
+            var fileName = string.IsNullOrWhiteSpace(sp.Anh) ? "placeholder-drink.jpg" : sp.Anh.Trim();
+            var imgUrl = Url.Content("~/images/" + fileName);
+
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100">
+                    <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@sp.MaSP">
+                        <img class="card-img-top" src="@imgUrl" alt="@sp.TenSP" />
+                    </a>
+                    <div class="card-body d-flex flex-column text-center">
+                        <h5 class="card-title mb-2">@sp.TenSP</h5>
+                        @if (sp.SanPhamSizes?.Any() == true)
+                        {
+                            var min = sp.SanPhamSizes.Min(s => s.Gia);
+                            var max = sp.SanPhamSizes.Max(s => s.Gia);
+                            <p class="card-text price mb-1">@(min == max ? $"{min:N0} đ" : $"{min:N0} đ – {max:N0} đ")</p>
+                        }
+                        else
+                        {
+                            <p class="muted mb-1">Chưa có size</p>
+                        }
+                        <p class="muted mb-3">Danh mục: @sp.DanhMuc?.TenDM</p>
+                        <button class="btn btn-outline-primary mt-auto" data-bs-toggle="modal" data-bs-target="#m_@sp.MaSP">🛒 Thêm vào giỏ</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= MODAL ================= -->
+            <div class="modal fade" id="m_@sp.MaSP" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form onsubmit="return false">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Chọn size cho @sp.TenSP</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="two-col">
+                                    <!-- LEFT: chọn size -->
+                                    <div class="left">
+                                        <table class="table align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width:56px" class="nowrap">Chọn</th>
+                                                    <th class="truncate">Món / Size</th>
+                                                    <th class="text-center nowrap" style="width:140px">Giá</th>
+                                                    <th class="text-center nowrap" style="width:100px">SL</th>
+                                                    <th class="text-end nowrap" style="width:160px">Thành tiền</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="selRows">
+                                                @foreach (var size in sp.SanPhamSizes)
+                                                {
+                                                    <tr data-gia="@size.Gia">
+                                                        <td class="text-center"><input type="checkbox" class="form-check-input sel-cb" value="@size.MaSize" /></td>
+                                                        <td class="truncate" title="@sp.TenSP — @size.Size.TenSize">
+                                                            @sp.TenSP <span class="text-muted">— @size.Size.TenSize</span>
+                                                        </td>
+                                                        <td class="text-center nowrap">@size.Gia.ToString("N0") đ</td>
+                                                        <td class="text-center nowrap">
+                                                            <input type="number" class="form-control form-control-sm sel-qty" value="0" min="0" style="width:80px" disabled />
+                                                        </td>
+                                                        <td class="text-end nowrap sel-line">0 đ</td>
+                                                    </tr>
+                                                }
+                                                <tr class="fw-bold">
+                                                    <td></td>
+                                                    <td colspan="3" class="text-end">Tổng cộng lựa chọn:</td>
+                                                    <td class="text-end nowrap"><span class="sumSel">0</span> đ</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- RIGHT: giỏ hàng -->
+                                    <div class="right">
+                                        <div class="card shadow-sm rounded-3 h-100">
+                                            <div class="card-header py-2">🧺 Giỏ hàng của bạn</div>
+                                            <div class="card-body p-0 cart-body-scroll">
+                                                <table class="table mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th class="truncate">Món</th>
+                                                            <th class="text-center nowrap" style="width:60px">Size</th>
+                                                            <th class="text-center nowrap" style="width:60px">SL</th>
+                                                            <th class="text-end nowrap" style="width:130px">Tiền</th>
+                                                            <th style="width:52px"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="cartRows">
+                                                        <tr class="text-muted"><td colspan="5">Giỏ hàng trống.</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!-- /two-col -->
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-success" onclick="submitAdd(@sp.MaSP,this)">➕ Thêm vào giỏ</button>
+                                <a href="/GioHang/XemGioHang" class="btn btn-primary btn-checkout disabled-link" data-allow="0">Thanh toán</a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+
+    @section Scripts {
+        <script>
+            // khởi tạo modal: wire 1 lần + nạp giỏ + khóa checkout
+            document.querySelectorAll('.modal').forEach(m=>{
+              m.addEventListener('shown.bs.modal', ()=>{
+                if(m.dataset.wired!=='1'){ wireModal(m); m.dataset.wired='1'; }
+                loadCartRows(m);
+                disableCheckout(m);
+              });
+              m.addEventListener('hidden.bs.modal', ()=>{
+                m.querySelectorAll('.sel-cb').forEach(el=>el.checked=false);
+                m.querySelectorAll('.sel-qty').forEach(el=>{el.value=0;el.disabled=true;});
+                m.querySelectorAll('.sel-line').forEach(el=>el.textContent='0 đ');
+                const sum=m.querySelector('.sumSel'); if(sum) sum.textContent='0';
+                disableCheckout(m);
+              });
+            });
+
+            function disableCheckout(modal){
+              const ck=modal.querySelector('.btn-checkout');
+              ck.dataset.allow="0"; ck.classList.add('disabled-link');
+            }
+            function enableCheckout(modal){
+              const ck=modal.querySelector('.btn-checkout');
+              ck.dataset.allow="1"; ck.classList.remove('disabled-link');
+            }
+            // chặn bấm Thanh toán khi chưa thêm
+            document.addEventListener('click', e=>{
+              const a=e.target.closest('.btn-checkout'); if(!a) return;
+              if(a.dataset.allow!=="1"){ e.preventDefault(); alert('Vui lòng thêm ít nhất 1 món trước khi thanh toán.'); }
+            });
+
+            function wireModal(modal){
+              const rows=modal.querySelectorAll('.selRows tr[data-gia]');
+              const sumSelEl=modal.querySelector('.sumSel');
+
+              function recalc(){
+                let sum=0;
+                rows.forEach(tr=>{
+                  const gia=+tr.dataset.gia||0;
+                  const cb=tr.querySelector('.sel-cb');
+                  const qty=+tr.querySelector('.sel-qty').value||0;
+                  const line=(cb.checked&&qty>0)?gia*qty:0;
+                  tr.querySelector('.sel-line').textContent=line.toLocaleString()+' đ';
+                  sum+=line;
+                });
+                sumSelEl.textContent=sum.toLocaleString();
+              }
+
+              rows.forEach(tr=>{
+                const cb=tr.querySelector('.sel-cb');
+                const q =tr.querySelector('.sel-qty');
+                cb.addEventListener('change',()=>{
+                  q.disabled=!cb.checked;
+                  if(cb.checked&&(+(q.value)||0)===0) q.value=1;
+                  recalc();
+                });
+                q.addEventListener('input',()=>{
+                  if(+q.value<0) q.value=0;
+                  if(+q.value>0) cb.checked=true;
+                  recalc();
+                });
+              });
+              recalc();
+            }
+
+            async function loadCartRows(modal){
+              const html=await (await fetch('/GioHang/MiniRows')).text();
+              modal.querySelector('.cartRows').innerHTML=html;
+            }
+
+            async function submitAdd(maSP, btn){
+              const modal=btn.closest('.modal');
+              const rows =modal.querySelectorAll('.selRows tr[data-gia]');
+              const fd=new FormData(); fd.append('MaSP',maSP);
+              let ok=false;
+
+              rows.forEach(tr=>{
+                const cb=tr.querySelector('.sel-cb');
+                const q =tr.querySelector('.sel-qty');
+                if(cb.checked && (+q.value)>0){
+                  ok=true;
+                  fd.append('SelectedSizes', cb.value);
+                  fd.append(`SoLuong[${cb.value}]`, q.value);
+                }
+              });
+
+              if(!ok){ alert('Vui lòng chọn size và số lượng > 0'); return; }
+
+              const html=await (await fetch('/GioHang/ThemAjax',{method:'POST',body:fd})).text();
+              modal.querySelector('.cartRows').innerHTML=html;
+
+              // reset phần chọn + bật checkout
+              rows.forEach(tr=>{
+                tr.querySelector('.sel-cb').checked=false;
+                const q=tr.querySelector('.sel-qty'); q.value=0; q.disabled=true;
+                tr.querySelector('.sel-line').textContent='0 đ';
+              });
+              modal.querySelector('.sumSel').textContent='0';
+              enableCheckout(modal);
+            }
+
+            // nút xoá trong giỏ (được render từ server)
+            async function cartRemove(maSP, maSize){
+              const fd=new FormData(); fd.append('MaSP',maSP); fd.append('MaSize',maSize);
+              const html=await (await fetch('/GioHang/XoaItemAjax',{method:'POST',body:fd})).text();
+              const holder=document.querySelector('.modal.show .cartRows');
+              if(holder) holder.innerHTML=html; 
+            }
+            window.cartRemove = cartRemove;
+        </script>
+    }
+
+}
+

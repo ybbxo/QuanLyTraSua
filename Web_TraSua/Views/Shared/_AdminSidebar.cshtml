@@ -1,0 +1,48 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IWebHostEnvironment Env
+@{
+    var role = Context.Session.GetString("Role");
+    var ctrl = (ViewContext.RouteData.Values["controller"]?.ToString() ?? "");
+    string Active(string c) => string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+@if (role == "QuanLy")
+{
+    <style>
+        .admin-sidebar .list-group-item {
+            border: 0;
+            border-radius: 10px;
+        }
+
+            .admin-sidebar .list-group-item.active {
+                background: #ffe7d6;
+                color: #b35b36;
+                font-weight: 700;
+            }
+
+        .admin-sidebar .card {
+            border-radius: 14px;
+            box-shadow: 0 10px 24px rgba(0,0,0,.08);
+        }
+    </style>
+    <div class="admin-sidebar">
+        <div class="card">
+            <div class="card-header fw-bold">⚙️ Khu vực quản trị</div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action @Active("QuanLy")" href="/QuanLy">🏠 Bảng điều khiển</a>
+                <a class="list-group-item list-group-item-action @Active("DanhMuc")" href="/DanhMuc">📂 Quản lý danh mục</a>
+                <a class="list-group-item list-group-item-action @Active("SanPham")" href="/SanPham">📦 Quản lý sản phẩm</a>
+                <a class="list-group-item list-group-item-action @Active("QuanLyDonHang")" href="/QuanLyDonHang">🧾 Quản lý đơn hàng</a>
+                <a class="list-group-item list-group-item-action @Active("BinhLuan")" href="/BinhLuan">💬 Quản lý bình luận</a>
+                <a class="list-group-item list-group-item-action @Active("KhachHang")" href="/KhachHang">👤 Quản lý khách hàng</a>
+                <a class="list-group-item @Active("NguyenLieuQuanLy")" href="/NguyenLieuQuanLy">📦 Nguyên liệu</a>
+                <a class="list-group-item list-group-item-action @Active("NhapKho")" href="/NhapKho">📥 Nhập kho nguyên liệu</a>
+                <a class="list-group-item list-group-item-action @Active("TonKho")" href="/TonKho">📥 Quản lý tồn kho nguyên liệu</a>
+                <a class="list-group-item list-group-item-action @Active("ThongKe")" href="/ThongKe/DoanhThuTheoThang">📊 Doanh thu theo tháng</a>
+                <a class="list-group-item list-group-item-action @Active("ThongKe")" href="/ThongKe/DoanhThuTheoNgay">📅 Doanh thu theo ngày</a>            
+            </div>
+            <div class="card-body pt-0">
+                <a class="btn btn-sm btn-outline-secondary w-100" href="/">↩ Về trang khách</a>
+            </div>
+        </div>
+    </div>
+}

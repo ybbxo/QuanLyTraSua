@@ -1,0 +1,31 @@
+﻿@model List<WebTraSua.Models.GioHangItem>
+@{
+    var has = Model != null && Model.Any(); var tong = has ? Model.Sum(x => x.ThanhTien) : 0m;
+}
+@if (!has)
+{
+    <div class="text-muted">Giỏ hàng trống.</div>
+}
+else
+{
+    <table class="table table-sm align-middle mb-2">
+        <thead class="table-light">
+            <tr><th>Món</th><th>Size</th><th>SL</th><th class="text-end">Tiền</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var i in Model)
+            {
+                <tr>
+                    <td>@i.TenSP</td>
+                    <td>@i.TenSize</td>
+                    <td>@i.SoLuong</td>
+                    <td class="text-end">@i.ThanhTien.ToString("N0") đ</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-danger" onclick="cartRemove(@i.MaSP,@i.MaSize)">✕</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="fw-bold text-end mb-2">Tổng: @tong.ToString("N0") đ</div>
+}

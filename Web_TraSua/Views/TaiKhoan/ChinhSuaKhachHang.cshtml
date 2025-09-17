@@ -1,0 +1,31 @@
+﻿@model WebTraSua.Models.KhachHang
+@{
+    ViewData["Title"] = "Chỉnh sửa thông tin";
+}
+<div class="card mx-auto" style="max-width:600px;">
+    <div class="card-header bg-warning text-white">
+        <h4>Chỉnh sửa thông tin cá nhân</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="ChinhSuaKhachHang" method="post">
+            <input type="hidden" asp-for="MaKH" />
+            <div class="mb-3">
+                <label class="form-label">Họ và tên</label>
+                <input class="form-control" asp-for="HoTen" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email (không thể đổi)</label>
+                <input class="form-control" asp-for="Email" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <input class="form-control" asp-for="SDT" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu</label>
+                <input class="form-control" asp-for="MatKhau" type="password" />
+            </div>
+            <button type="submit" class="btn btn-success">Cập nhật</button>
+        </form>
+    </div>
+</div>
